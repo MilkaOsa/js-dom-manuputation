@@ -1,0 +1,129 @@
+/* Aplicar la fuente Pacifico al h2 con clase .fw-light */
+h2.fw-light {
+  font-family: 'Pacifico', cursive; 
+}
+
+
+/* Estilo para el formulario de creación de tareas */
+#task-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-family: 'Poppins', sans-serif
+}
+
+#task-name {
+  flex: 2;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+#task-priority {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button[type="submit"] {
+  padding: 8px 15px;
+  background-color: #4c2882;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Pacifico', sans-serif;
+}
+
+button[type="submit"]:hover {
+  background-color: #948ca1;
+}
+
+/* Estilo para la lista de tareas */
+.list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif
+}
+
+/* Estilo para los íconos de prioridad */
+.priority-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Estilo para los botones de acción (borrar, editar, etc.) */
+.list-group-item i {
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+
+/* Estilo para las tareas completadas */
+.completed {
+  background-color: #d3d3d3; /* Fondo gris */
+}
+
+/* Tareas completadas con texto tachado */
+.text-decoration-line-through {
+  text-decoration: line-through;
+}
+
+/* Estilo para íconos */
+.priority-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Desactivar sólo el botón de eliminar si está completada */
+.completed i.fa-trash-o {
+  pointer-events: none; /* Desactivar el clic en el ícono de eliminar */
+  opacity: 0.5; /* Ícono más tenue para indicar que está desactivado */
+}
+
+/* Los demás íconos (completar y prioridad) seguirán siendo clickeables */
+.list-group-item i {
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+
+#filter-form {
+  margin-bottom: 20px;
+  font-family: 'Poppins', sans-serif
+}
+
+#task-filter {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+
+.completed {
+  background-color: #d3d3d3; /* Tareas completadas en gris */
+}
+
+.text-decoration-line-through {
+  text-decoration: line-through;
+}
+
+.priority-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.list-group-item i {
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+/* Opcional: Puedes personalizar el fondo rojo o amarillo con más detalles */
+
