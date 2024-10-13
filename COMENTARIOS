@@ -1,0 +1,448 @@
+Este proyecto consiste en un gestor de tareas que permite añadir, filtrar, y gestionar una lista de tareas utilizando HTML, JavaScript y la biblioteca Bootstrap. A continuación, explicaré cómo se ha programado cada archivo:
+
+### **1. `index.html` (Estructura del HTML)**
+Este archivo define la estructura básica de la página web y el formulario de gestión de tareas:
+
+- **Formulario de añadir tarea**: Permite al usuario ingresar el nombre de la tarea, establecer la prioridad, y definir la fecha de vencimiento.
+- **Formulario de filtro de prioridad**: Permite filtrar las tareas según su prioridad para facilitar la gestión.
+- **Lista de tareas (`ul` con id `tasks-container`)**: Es el contenedor donde se mostrarán las tareas que el usuario añade.
+- **Recursos externos**: Se incluyen Bootstrap para los estilos, Font Awesome para los iconos y un enlace al archivo CSS local. Además, los scripts JavaScript (`task-manager.js` y `main.js`) están enlazados al final del archivo para gestionar el comportamiento dinámico de la página.
+
+### **2. `task-manager.js` (Clase TaskManager)**
+Este archivo contiene la clase `TaskManager`, que se encarga de gestionar las tareas de la aplicación:
+
+- **Constructor**: Inicializa el contenedor donde se mostrarán las tareas, una lista de tareas vacía, y el filtro para las tareas.
+- **Método `add(taskData)`**: Añade una nueva tarea a la lista. Cada tarea tiene un nombre, una prioridad, una fecha, y un estado de completado.
+- **Método `delete(id)`**: Elimina una tarea de la lista de tareas usando su ID.
+- **Método `toggleCompleted(id)`**: Cambia el estado de completado de una tarea.
+- **Método `setFilter(filter)`**: Permite establecer un filtro para las tareas según su prioridad.
+- **Método `buildTaskHTML(task)`**: Crea un nodo HTML para cada tarea, mostrando su nombre, prioridad, y fecha. Si la tarea es de hoy, se destaca en amarillo; si la tarea está vencida y no está completada, se destaca en rojo.
+- **Método `render()`**: Renderiza la lista de tareas en el contenedor correspondiente, aplicando el filtro de prioridad y ordenando las tareas por fecha.
+
+### **3. `main.js` (Interacción del DOM)**
+Este archivo gestiona la interacción con el DOM para permitir al usuario manipular el TaskManager:
+
+- **Evento `DOMContentLoaded`**: Espera que la página cargue completamente antes de inicializar la lógica del TaskManager.
+- **Agregar tareas**: Captura los datos del formulario (nombre, prioridad, fecha) y los añade al `TaskManager` cuando el formulario es enviado.
+- **Filtrar tareas**: Detecta cambios en el filtro de prioridad y actualiza la visualización de las tareas.
+- **Renderización inicial**: Al cargar la página y cada vez que se añaden/eliminan tareas, el `TaskManager` vuelve a renderizar la lista.
+
+### **Funcionamiento General**
+El funcionamiento del gestor de tareas es sencillo y eficaz:
+1. **Agregar tareas**: El usuario ingresa una nueva tarea con nombre, prioridad y fecha límite. Esta tarea se almacena en la lista y se muestra en la interfaz.
+2. **Eliminar y completar tareas**: Se añaden iconos para permitir eliminar o marcar como completada cada tarea.
+3. **Filtrar tareas**: Se pueden filtrar las tareas por prioridad, y estas se muestran en orden cronológico según su fecha.
+
+Este proyecto utiliza JavaScript para gestionar la lógica de la aplicación, y se apoya en HTML y CSS para definir y estilizar la interfaz, haciendo que el usuario tenga una experiencia visual organizada y práctica.
+
+Voy a analizar en profundidad cada uno de los métodos implementados en la clase `TaskManager` dentro del archivo `task-manager.js`, para detallar su funcionamiento y lógica:
+
+### **Clase `TaskManager`**
+La clase `TaskManager` se encarga de gestionar las tareas y la lógica relacionada. Se utiliza para crear instancias que controlan una lista de tareas que se renderizan en la interfaz de usuario.
+
+---
+
+### **1. Constructor (`constructor(containerId)`)**
+```javascript
+constructor(containerId) {
+  this.containerId = containerId;
+  this.tasks = [];
+  this.filter = 'all';
+}
+```
+- **Parámetro `containerId`**: Recibe el `id` del contenedor donde se mostrarán las tareas. Esto facilita la manipulación directa del DOM al renderizar las tareas.
+- **Propiedad `this.tasks`**: Es un array donde se almacenan las tareas creadas. 
+Cada tarea es un objeto con atributos como `id`, `name`, `priority`, `date`, y `completed`.
+- **Propiedad `this.filter`**: Define el filtro actual de prioridad, que se inicializa como `'all'`. Este filtro se usa para decidir qué tareas mostrar al usuario.
+
+---
+
+### **2. Método `add(taskData)`**
+```javascript
+add(taskData) {
+  const { name, priority, date } = taskData;
+  this.tasks.push({
+    id: self.crypto.randomUUID(),
+    name,
+    priority,
+    date,
+    completed: false
+  });
+}
+```
+- **Parámetro `taskData`**: Es un objeto que contiene los datos de la tarea: `name` (nombre de la tarea), `priority` (prioridad) y `date` (fecha límite).
+- **Destructuración**: Extrae `name`, `priority`, y `date` del objeto `taskData`.
+- **Generación de ID único**: Utiliza `self.crypto.randomUUID()` para generar un identificador único (`id`) para cada tarea. 
+Esto asegura que cada tarea pueda ser identificada de forma individual, lo cual es fundamental para operaciones como eliminar o marcar tareas.
+- **Propiedad `completed`**: Se establece en `false` inicialmente, lo cual indica que la tarea está pendiente.
+
+**Propósito**: Este método agrega una nueva tarea a la lista `this.tasks` manteniendo toda la información necesaria, 
+lo que permite su gestión a lo largo de la aplicación.
+
+---
+
+### **3. Método `delete(id)`**
+```javascript
+delete(id) {
+  this.tasks = this.tasks.filter(task => task.id !== id && !task.completed);
+}
+```
+- **Parámetro `id`**: Es el identificador de la tarea que se desea eliminar.
+- **Filtrado de tareas**: El método utiliza `Array.prototype.filter` para mantener solo las tareas cuyo `id` no coincide con el `id` recibido, 
+y además verifica que las tareas no estén completadas. 
+Si una tarea está completada, se evita eliminarla, asegurando que las tareas completadas sean eliminadas de una manera controlada por el usuario.
+
+**Propósito**: Este método permite eliminar una tarea específica identificada por su `id`. 
+Además, tiene lógica adicional para no eliminar tareas completadas accidentalmente.
+
+---
+
+### **4. Método `toggleCompleted(id)`**
+```javascript
+toggleCompleted(id) {
+  const task = this.tasks.find(task => task.id === id);
+  if (task) {
+    task.completed = !task.completed;
+  }
+}
+```
+- **Parámetro `id`**: El identificador de la tarea cuyo estado de completado se desea cambiar.
+- **Búsqueda de tarea**: Utiliza `Array.prototype.find` para encontrar la tarea con el `id` especificado.
+- **Cambio de estado**: Invierte (`!`) el valor del atributo `completed` de la tarea. Esto permite alternar entre los estados de completada y no completada.
+
+**Propósito**: Este método proporciona una forma sencilla de marcar una tarea como completada o de revertir ese estado, lo cual es esencial para la gestión dinámica de las tareas.
+
+---
+
+### **5. Método `setFilter(filter)`**
+```javascript
+setFilter(filter) {
+  this.filter = filter;
+}
+```
+- **Parámetro `filter`**: Es el filtro que se quiere aplicar, que puede ser `'all'` o una de las prioridades disponibles (`Critical`, `High`, etc.).
+- **Actualización del filtro**: Establece el valor del filtro para usarlo durante la renderización.
+
+**Propósito**: Permite al usuario filtrar las tareas mostradas en función de su prioridad, mejorando la organización y usabilidad de la lista de tareas.
+
+---
+
+### **6. Método `buildTaskHTML(task)`**
+```javascript
+buildTaskHTML(task) {
+  const taskNode = document.createElement('li');
+  taskNode.setAttribute('id', task.id);
+  taskNode.classList.add('list-group-item', 'd-flex', 'gap-1', 'align-items-baseline');
+
+  const taskDate = new Date(task.date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (taskDate.getTime() === today.getTime()) {
+    taskNode.style.backgroundColor = 'yellow';
+  }
+  if (taskDate.getTime() < today.getTime() && !task.completed) {
+    taskNode.style.backgroundColor = 'red';
+  }
+  if (task.completed) {
+    taskNode.classList.add('completed');
+  }
+
+  const taskNameNode = document.createElement('div');
+  taskNameNode.classList.add('me-auto');
+  if (task.completed) {
+    taskNameNode.classList.add('text-decoration-line-through');
+  }
+  taskNameNode.appendChild(document.createTextNode(`${task.name} - Due: ${task.date}`));
+  taskNode.appendChild(taskNameNode);
+
+  const taskActionsNode = document.createElement('div');
+  taskActionsNode.classList.add('d-flex', 'gap-2');
+  taskNode.appendChild(taskActionsNode);
+
+  if (!task.completed) {
+    const deleteTaskNode = document.createElement('i');
+    deleteTaskNode.classList.add('fa', 'fa-trash-o', 'text-danger');
+    deleteTaskNode.setAttribute('role', 'button');
+    taskActionsNode.appendChild(deleteTaskNode);
+
+    deleteTaskNode.addEventListener('click', () => {
+      this.delete(task.id);
+      this.render();
+    });
+  }
+
+  const completeTaskNode = document.createElement('i');
+  completeTaskNode.classList.add('fa', 'fa-check', 'text-success');
+  completeTaskNode.setAttribute('role', 'button');
+  taskActionsNode.appendChild(completeTaskNode);
+
+  completeTaskNode.addEventListener('click', () => {
+    this.toggleCompleted(task.id);
+    this.render();
+  });
+
+  const priorityIcon = document.createElement('img');
+  priorityIcon.src = `/assets/img/icons/priority/${task.priority.toLowerCase()}.svg`;
+  priorityIcon.alt = task.priority;
+  priorityIcon.classList.add('priority-icon');
+  taskActionsNode.appendChild(priorityIcon);
+
+  return taskNode;
+}
+```
+- **Crea el nodo HTML para una tarea**: Utiliza `document.createElement` para construir la estructura del elemento de la lista (`<li>`).
+- **Estilos condicionales**:
+  - Tareas con fecha límite hoy se resaltan en amarillo.
+  - Tareas vencidas se resaltan en rojo si no están completadas.
+  - Tareas completadas tienen una clase para tachar el texto.
+- **Botones de acción**: Añade iconos con eventos de `click` para eliminar o marcar la tarea como completada.
+
+**Propósito**: Este método crea el HTML dinámico necesario para mostrar cada tarea en la interfaz de usuario con toda la información relevante y acciones disponibles.
+
+---
+
+### **7. Método `render()`**
+```javascript
+render() {
+  const container = document.getElementById(this.containerId);
+  container.innerHTML = '';
+
+  const filteredTasks = this.tasks.filter(task => {
+    return this.filter === 'all' || task.priority === this.filter;
+  });
+
+  const sortedTasks = filteredTasks.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  for (let i = 0; i < sortedTasks.length; i++) {
+    const task = sortedTasks[i];
+    container.appendChild(this.buildTaskHTML(task));
+  }
+}
+```
+- **Limpieza del contenedor**: Elimina el contenido del contenedor antes de agregar las tareas actualizadas.
+- **Filtrado y ordenación**:
+  - **Filtrado**: Filtra las tareas de acuerdo al filtro establecido (`this.filter`).
+  - **Ordenación**: Ordena las tareas por fecha para mostrar primero las más cercanas.
+- **Renderización**: Llama a `buildTaskHTML()` para cada tarea y agrega el resultado al contenedor.
+
+**Propósito**: Renderiza la lista de tareas actualizadas en el DOM, reflejando cualquier cambio realizado (como añadir, eliminar, o completar una tarea). 
+Esto garantiza que la interfaz esté sincronizada con los datos subyacentes.
+
+---
+
+### **Resumen**
+Cada método tiene un propósito bien definido para gestionar y manipular las tareas. En conjunto, la clase `TaskManager` proporciona una gestión eficiente de las tareas, incluyendo agregar, eliminar, completar, filtrar y renderizar, lo que resulta en una aplicación completa y funcional para la gestión de tareas. 
+La separación de preocupaciones y el uso de eventos dinámicos permite mantener el código organizado y claro.
+
+
+Voy a analizar en detalle cómo se realiza la manipulación del DOM en el proyecto del gestor de tareas. 
+La manipulación del DOM es clave para mantener sincronizados los datos (tareas) con la interfaz gráfica que ve el usuario.
+
+### **Eventos y Manipulación del DOM**
+
+La interacción del usuario con la página y la gestión de tareas se maneja a través de la clase `TaskManager` y el archivo `main.js`, que se encargan de capturar eventos, actualizar datos y reflejar estos cambios en el DOM.
+
+A continuación, desglosaré cómo se realiza la manipulación del DOM en los distintos componentes del proyecto.
+
+---
+
+### **1. Creación Dinámica de Elementos HTML (`buildTaskHTML`)**
+El método `buildTaskHTML(task)` en la clase `TaskManager` es fundamental para la manipulación del DOM, ya que construye y retorna el nodo HTML para cada tarea.
+
+```javascript
+buildTaskHTML(task) {
+  const taskNode = document.createElement('li');
+  taskNode.setAttribute('id', task.id);
+  taskNode.classList.add('list-group-item', 'd-flex', 'gap-1', 'align-items-baseline');
+
+  const taskDate = new Date(task.date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (taskDate.getTime() === today.getTime()) {
+    taskNode.style.backgroundColor = 'yellow';
+  }
+  if (taskDate.getTime() < today.getTime() && !task.completed) {
+    taskNode.style.backgroundColor = 'red';
+  }
+  if (task.completed) {
+    taskNode.classList.add('completed');
+  }
+
+  const taskNameNode = document.createElement('div');
+  taskNameNode.classList.add('me-auto');
+  if (task.completed) {
+    taskNameNode.classList.add('text-decoration-line-through');
+  }
+  taskNameNode.appendChild(document.createTextNode(`${task.name} - Due: ${task.date}`));
+  taskNode.appendChild(taskNameNode);
+
+  const taskActionsNode = document.createElement('div');
+  taskActionsNode.classList.add('d-flex', 'gap-2');
+  taskNode.appendChild(taskActionsNode);
+
+  // Agregar ícono de eliminar tarea
+  if (!task.completed) {
+    const deleteTaskNode = document.createElement('i');
+    deleteTaskNode.classList.add('fa', 'fa-trash-o', 'text-danger');
+    deleteTaskNode.setAttribute('role', 'button');
+    taskActionsNode.appendChild(deleteTaskNode);
+
+    deleteTaskNode.addEventListener('click', () => {
+      this.delete(task.id);
+      this.render();
+    });
+  }
+
+  // Agregar ícono de marcar como completada
+  const completeTaskNode = document.createElement('i');
+  completeTaskNode.classList.add('fa', 'fa-check', 'text-success');
+  completeTaskNode.setAttribute('role', 'button');
+  taskActionsNode.appendChild(completeTaskNode);
+
+  completeTaskNode.addEventListener('click', () => {
+    this.toggleCompleted(task.id);
+    this.render();
+  });
+
+  // Agregar ícono de prioridad
+  const priorityIcon = document.createElement('img');
+  priorityIcon.src = `/assets/img/icons/priority/${task.priority.toLowerCase()}.svg`;
+  priorityIcon.alt = task.priority;
+  priorityIcon.classList.add('priority-icon');
+  taskActionsNode.appendChild(priorityIcon);
+
+  return taskNode;
+}
+```
+
+#### **Análisis Detallado:**
+1. **Creación de Elementos (`document.createElement`)**: 
+   - Crea dinámicamente los elementos necesarios (`<li>`, `<div>`, `<i>`, `<img>`).
+   - Cada elemento representa una parte específica de la tarea, como el contenedor (`taskNode`), el nombre de la tarea (`taskNameNode`), 
+y los iconos de acciones (`deleteTaskNode`, `completeTaskNode`, `priorityIcon`).
+  
+2. **Asignación de Atributos y Clases**:
+   - Se asignan atributos (`setAttribute`) y clases (`classList.add`) a los elementos para identificarlos y darles estilo. 
+   - Por ejemplo, cada tarea tiene una clase `list-group-item` que pertenece a Bootstrap para darle un estilo uniforme.
+
+3. **Estilos Dinámicos**:
+   - Se aplican estilos condicionales para resaltar tareas de hoy (`taskNode.style.backgroundColor = 'yellow'`) o vencidas (`taskNode.style.backgroundColor = 'red'`).
+  
+4. **Eventos de Click**:
+   - Se añaden `eventListeners` a los botones de eliminar (`deleteTaskNode`) y completar (`completeTaskNode`). Estos eventos manejan acciones de usuario como:
+     - **Eliminar una tarea**: Llama a `this.delete(task.id)` y luego `this.render()`.
+     - **Completar una tarea**: Cambia el estado de completado (`toggleCompleted(task.id)`) y renderiza la lista.
+
+5. **Estructura HTML Completa de la Tarea**:
+   - Cada nodo se añade de forma jerárquica (padre-hijo), formando la estructura completa de cada tarea.
+   - El nodo principal (`taskNode`) contiene todos los subcomponentes (`taskNameNode`, `taskActionsNode`), logrando una estructura coherente y organizada.
+
+**Propósito**: Este método se encarga de construir la estructura visual de cada tarea que se añade al contenedor del DOM. 
+Esto permite mostrar cada tarea de manera consistente y con todas las funcionalidades asociadas, como eliminar o completar.
+
+---
+
+### **2. Renderización de las Tareas (`render`)**
+El método `render()` de la clase `TaskManager` se encarga de actualizar la lista de tareas en el DOM:
+
+```javascript
+render() {
+  const container = document.getElementById(this.containerId);
+  container.innerHTML = '';
+
+  const filteredTasks = this.tasks.filter(task => {
+    return this.filter === 'all' || task.priority === this.filter;
+  });
+
+  const sortedTasks = filteredTasks.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  for (let i = 0; i < sortedTasks.length; i++) {
+    const task = sortedTasks[i];
+    container.appendChild(this.buildTaskHTML(task));
+  }
+}
+```
+
+#### **Análisis Detallado:**
+1. **Selección del Contenedor (`getElementById`)**:
+   - Se obtiene el contenedor del DOM donde se mostrarán las tareas (`this.containerId`).
+
+2. **Limpieza del Contenedor (`innerHTML = ''`)**:
+   - Antes de renderizar las tareas, se elimina cualquier contenido previo del contenedor. 
+Esto garantiza que la lista se renderice desde cero, evitando duplicados o residuos de tareas antiguas.
+
+3. **Filtrado y Ordenación**:
+   - **Filtrado**: Solo se mantienen las tareas que coinciden con el filtro activo (`this.filter`).
+   - **Ordenación**: Se ordenan las tareas por fecha para que las tareas más próximas se muestren primero.
+
+4. **Construcción de la Lista de Tareas**:
+   - Se recorre el array de tareas filtradas y ordenadas (`sortedTasks`), y para cada una se llama a `buildTaskHTML()`.
+   - Luego, cada nodo HTML resultante se añade al contenedor (`container.appendChild`).
+
+**Propósito**: Este método es crucial para mantener la lista de tareas en pantalla sincronizada con el estado interno (`this.tasks`). 
+Renderiza la interfaz cada vez que ocurre un cambio, asegurando que el usuario siempre vea la versión más actualizada de la lista de tareas.
+
+---
+
+### **3. Gestión de Eventos en el DOM (`main.js`)**
+El archivo `main.js` gestiona la interacción entre los formularios del HTML y la clase `TaskManager`.
+
+```javascript
+window.addEventListener('DOMContentLoaded', () => {
+  const taskManager = new TaskManager('tasks-container');
+
+  const taskForm = document.getElementById('task-form');
+  taskForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const taskName = document.getElementById('task-name').value;
+    const taskPriority = document.getElementById('task-priority').value;
+    const taskDate = document.getElementById('task-date').value;
+
+    taskManager.add({ name: taskName, priority: taskPriority, date: taskDate });
+    taskManager.render();
+
+    taskForm.reset();
+  });
+
+  const filterForm = document.getElementById('task-filter');
+  filterForm.addEventListener('change', (event) => {
+    const selectedFilter = event.target.value;
+    taskManager.setFilter(selectedFilter);
+    taskManager.render();
+  });
+
+  taskManager.render();
+});
+```
+
+#### **Análisis Detallado:**
+1. **Evento `DOMContentLoaded`**:
+   - **Inicialización**: Espera que todo el contenido del HTML esté cargado antes de ejecutar el código. Esto asegura que los elementos del DOM estén disponibles.
+   - **Creación del `TaskManager`**: Se crea una nueva instancia del `TaskManager` con el ID del contenedor de tareas (`tasks-container`).
+
+2. **Añadir Tareas (`submit`)**:
+   - **Captura del Formulario**: Se agrega un evento `submit` al formulario (`task-form`) para capturar la acción de añadir una nueva tarea.
+   - **Prevención del Comportamiento por Defecto**: `event.preventDefault()` se utiliza para evitar que la página se recargue cuando se envía el formulario.
+   - **Obtención de Datos del Formulario**: Se capturan los valores de los inputs (`task-name`, `task-priority`, `task-date`) y se pasan al método `add()` del `TaskManager`.
+   - **Renderización y Reseteo**: Se llama a `taskManager.render()` para actualizar la lista de tareas, y `taskForm.reset()` limpia el formulario.
+
+3. **Cambio en el Filtro (`change`)**:
+   - **Captura del Selector de Filtro**: Se añade un evento `change` al selector (`task-filter`) para detectar cambios en la prioridad a filtrar.
+   - **Establecer Filtro y Renderizar**: `setFilter()` actualiza el filtro activo y luego se llama a `render()` para reflejar el filtro en la interfaz.
+
+**Propósito**: Este archivo es la conexión entre la interfaz HTML y la lógica del `TaskManager`. 
+Gestiona cómo y cuándo se interactúa con la interfaz, como al añadir tareas o filtrar la lista, manteniendo la aplicación reactiva a las acciones del usuario.
+
+---
+
+### **Resumen General**
+La manipulación del DOM en este proyecto se realiza principalmente a través de:
+- **Construcción dinámica de nodos HTML** (`buildTaskHTML`).
+- **Renderización y actualización del contenido** (`render`).
+- **Manejo de eventos del usuario** en el archivo `main.js`, como la captura de formularios y la actualización del filtro.
+
+La manipulación del DOM se realiza de manera eficiente, asegurando que cada cambio en los datos internos de las tareas se vea reflejado en la interfaz,
+lo cual mejora la experiencia del usuario manteniendo la sincronización entre los datos y la visualización.
